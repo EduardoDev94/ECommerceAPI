@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="../Application/Application.csproj" />
+  <Project Path="../Core/Core.csproj" />
+  <Project Path="../CrossCutting/CrossCutting.csproj" />
+  <Project Path="../Infrastructure/Infrastructure.csproj" />
+  <Project Path="ECommerceAPI.csproj" />
+</Solution>

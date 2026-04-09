@@ -8,15 +8,15 @@ services:
     image: postgres:16-alpine
     container_name: postgres-ecommerce
     environment:
-      POSTGRES_USER: ecommerce_user
-      POSTGRES_PASSWORD: SecurePassword123!
-      POSTGRES_DB: ECommerceDb
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ecommerce_user -d ECommerceDb"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,11 +34,12 @@ services:
       dockerfile: ./ECommerceAPI/Dockerfile
     container_name: ecommerce-api
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=postgres-ecommerce;Port=5432;Database=ECommerceDb;Username=ecommerce_user;Password=SecurePassword123!
-      - NewRelic__LicenseKey=${NEW_RELIC_LICENSE_KEY:-}
-      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY:-}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=${ASPNETCORE_URLS}
+      - ConnectionStrings__DefaultConnection=Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - NewRelic__LicenseKey=${NEW_RELIC_LICENSE_KEY}
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -64,8 +65,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: pgadmin-ecommerce
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@ecommerce.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"
     depends_on:

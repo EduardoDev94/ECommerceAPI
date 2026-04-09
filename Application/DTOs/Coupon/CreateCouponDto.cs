@@ -1,0 +1,9 @@
+namespace Application.DTOs.Coupon;
+
+public class CreateCouponDto
+{
+    public string Code { get; set; } = string.Empty;
+    public decimal DiscountPercentage { get; set; }
+    public DateTime ExpirationDate { get; set; }
+    public int UsageLimit { get; set; }
+}

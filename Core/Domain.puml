@@ -1,0 +1,121 @@
+@startuml ECommerce_Domain_Model
+
+!theme plain
+scale 1.2
+
+entity User {
+  Id: Guid <<PK>>
+  Name: string
+  Email: string
+  CartId: Guid <<FK>>
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+entity Cart {
+  Id: Guid <<PK>>
+  UserId: Guid <<FK>>
+  TotalAmount: decimal
+  DiscountAmount: decimal
+  FinalAmount: decimal
+  CouponId: Guid <<FK>>?
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+entity CartItem {
+  Id: Guid <<PK>>
+  CartId: Guid <<FK>>
+  ProductId: Guid <<FK>>
+  Quantity: int
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+entity Product {
+  Id: Guid <<PK>>
+  Name: string
+  Description: string
+  Price: decimal
+  Stock: int
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+entity Coupon {
+  Id: Guid <<PK>>
+  Code: string
+  DiscountPercentage: decimal
+  ExpirationDate: DateTime
+  IsActive: bool
+  UsageLimit: int
+  TimesUsed: int
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+entity Order {
+  Id: Guid <<PK>>
+  UserId: Guid <<FK>>
+  OrderDate: DateTime
+  TotalAmount: decimal
+  DiscountAmount: decimal
+  FinalAmount: decimal
+  CouponCode: string?
+  Status: OrderStatus
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+entity OrderItem {
+  Id: Guid <<PK>>
+  OrderId: Guid <<FK>>
+  ProductId: Guid <<FK>>
+  Quantity: int
+  UnitPrice: decimal (📌 Price snapshot)
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+enum OrderStatus {
+  Pending
+  Paid
+  Processing
+  Shipped
+  Delivered
+  Cancelled
+}
+
+User ||--|| Cart : "1:1 has"
+User ||--o{ Order : "1:N places"
+Cart ||--o{ CartItem : "1:N contains"
+CartItem }o--|| Product : "N:1 references"
+Cart }o--|| Coupon : "0..1 uses"
+Order ||--o{ OrderItem : "1:N contains"
+OrderItem }o--|| Product : "N:1 references"
+Order --* OrderStatus : "has"
+
+note right of Cart
+  CalculateTotals()
+  AddItem()
+  RemoveItem()
+  Clear()
+end note
+
+note right of Coupon
+  IsValid()
+  IncrementUsage()
+end note
+
+note right of Order
+  ⚠️ IMMUTABLE (except Status)
+  UpdateStatus()
+end note
+
+note right of OrderItem
+  ⚠️ UnitPrice = Snapshot
+  TotalPrice = Quantity × UnitPrice
+  CreateFromCartItem()
+end note
+
+@enduml

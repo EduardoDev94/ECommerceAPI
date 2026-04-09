@@ -1,0 +1,27 @@
+[33mcommit d001e71acc8c68ef62446ab8fa7929ebd4e85979[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Eduardo Goncalves Sena <112581981+EduardoDev94@users.noreply.github.com>
+Date:   Wed Apr 8 17:20:01 2026 -0300
+
+    Adicionar arquivos de projeto.
+
+ .dockerignore                     |  30 [32m++++[m
+ .env.docker                       |  19 [32m++[m
+ Controllers/ApiControllerBase.cs  |  42 [32m+++++[m
+ Controllers/AuthController.cs     |  29 [32m+++[m
+ Controllers/CartController.cs     |  75 [32m++++++++[m
+ Controllers/CouponsController.cs  |  67 [32m+++++++[m
+ Controllers/OrdersController.cs   |  62 [32m+++++++[m
+ Controllers/ProductsController.cs |  72 [32m++++++++[m
+ Controllers/UsersController.cs    |  76 [32m++++++++[m
+ DOCKER-SETUP.md                   | 184 [32m+++++++++++++++++++[m
+ Dockerfile                        |  43 [32m+++++[m
+ ECommerceAPI.csproj               |  31 [32m++++[m
+ ECommerceAPI.http                 |   6 [32m+[m
+ ECommerceAPI.slnx                 |   7 [32m+[m
+ INFRASTRUCTURE-COMPLETED.md       | 366 [32m++++++++++++++++++++++++++++++++++++++[m
+ Program.cs                        |  62 [32m+++++++[m
+ Properties/launchSettings.json    |  31 [32m++++[m
+ appsettings.Development.json      |  17 [32m++[m
+ appsettings.json                  |  42 [32m+++++[m
+ docker-compose.yml                |  79 [32m++++++++[m
+ 20 files changed, 1340 insertions(+)

@@ -1,62 +1,31 @@
-using Scalar.AspNetCore;
-using Infrastructure.Data;
-using Infrastructure.Extensions;
+using EcommerceAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
-using Application.Extensions;
-using CrossCutting.Extensions;
-using CrossCutting.Logging;
-
-// Bootstrap logger: captura erros antes do host estar configurado
-Log.Logger = SerilogConfiguration.CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog completo com CorrelationId, Application e Environment
-builder.Host.UseApplicationSerilog();
+// Add services to the container.
 
-try
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default Connection")));
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    builder.Services.AddControllers();
-    builder.Services.AddOpenApi();
-
-    builder.Services.AddApplicationServices();
-    builder.Services.AddCrossCuttingServices(builder.Configuration);
-    builder.Services.AddInfrastructureServices();
-
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    builder.Services.AddDbContext<ECommerceDbContext>(options =>
-        options.UseNpgsql(connectionString)
-    );
-
-    var app = builder.Build();
-
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ECommerceDbContext>();
-        dbContext.Database.Migrate();
-    }
-
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-
-    // CorrelationId ? ErrorHandling ? SerilogRequestLogging ? resto da pipeline
-    app.UseCrossCuttingMiddlewares();
-
-    app.UseHttpsRedirection();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    app.MapControllers();
-
-    Log.Information("Iniciando aplicação E-commerce API");
-    app.Run();
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, "Aplicação encerrada com erro");
-}
-finally
-{
-    Log.CloseAndFlush();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

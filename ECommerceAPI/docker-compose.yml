@@ -1,0 +1,79 @@
+services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres-ecommerce:
+    image: postgres:16-alpine
+    container_name: postgres-ecommerce
+    environment:
+      POSTGRES_USER: ecommerce_user
+      POSTGRES_PASSWORD: SecurePassword123!
+      POSTGRES_DB: ECommerceDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecommerce_user -d ECommerceDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # ============================================
+  # E-commerce API
+  # ============================================
+  ecommerce-api:
+    build:
+      context: .
+      dockerfile: ./ECommerceAPI/Dockerfile
+    container_name: ecommerce-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-ecommerce;Port=5432;Database=ECommerceDb;Username=ecommerce_user;Password=SecurePassword123!
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      postgres-ecommerce:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/openapi/v1.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+  # ============================================
+  # pgAdmin - Administração do PostgreSQL
+  # ============================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-ecommerce
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ecommerce.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-ecommerce
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  ecommerce-network:
+    driver: bridge

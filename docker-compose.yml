@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   # ============================================
   # PostgreSQL Database
@@ -10,7 +12,7 @@ services:
       POSTGRES_PASSWORD: SecurePassword123!
       POSTGRES_DB: ECommerceDb
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -35,6 +37,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Host=postgres-ecommerce;Port=5432;Database=ECommerceDb;Username=ecommerce_user;Password=SecurePassword123!
+      - NewRelic__LicenseKey=${NEW_RELIC_LICENSE_KEY:-}
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY:-}
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -68,6 +72,25 @@ services:
       - postgres-ecommerce
     networks:
       - ecommerce-network
+    restart: unless-stopped
+
+  # ============================================
+  # New Relic Infrastructure Agent
+  # Monitora host, containers e correlaciona com APM/Logs
+  # ============================================
+  newrelic-infra:
+    image: newrelic/infrastructure:latest
+    container_name: newrelic-infra
+    network_mode: host
+    cap_add:
+      - SYS_PTRACE
+    privileged: true
+    pid: host
+    environment:
+      - NRIA_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}
+    volumes:
+      - /:/host:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
 volumes:

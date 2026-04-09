@@ -1,0 +1,13 @@
+namespace Core.Common;
+
+/// <summary>
+/// Classe base abstrata para todas as entidades do domínio
+/// Fornece propriedades comuns e auditoria básica
+/// </summary>
+public abstract class Entity
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsActive { get; set; } = true;
+}
